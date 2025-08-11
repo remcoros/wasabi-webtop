@@ -10,7 +10,7 @@ cp /defaults/.backupignore /config/.backupignore
 # always overwrite autostart in case we change it
 mkdir -p /config/.config/openbox
 cp /defaults/autostart /config/.config/openbox/autostart
-chown -R $PUID:$PGID /config/.config/openbox
+chown -R 1000:1000 /config/.config/openbox
 
 # set RECONNECT to 1 if it's not defined
 if [ -z "$RECONNECT" ]; then

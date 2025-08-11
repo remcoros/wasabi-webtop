@@ -52,3 +52,4 @@ jobs:
           tags: |
             ghcr.io/${{ steps.vars.outputs.owner }}/wasabi-webtop:${{ steps.vars.outputs.version }}
             ghcr.io/${{ steps.vars.outputs.owner }}/wasabi-webtop:${{ github.sha }}
+            ghcr.io/${{ steps.vars.outputs.owner }}/wasabi-webtop:latest
