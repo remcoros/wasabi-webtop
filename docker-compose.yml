@@ -7,34 +7,27 @@ services:
     container_name: wasabi-webtop
     ports:
       - "3000:3000"
+      - "3001:3001"
     environment:
+      # CHANGE THIS USERNAME/PASSWORD!!
+      - CUSTOMER_USER=webtop
+      - PASSWORD=password
+      - PUID=1000
+      - PGID=1000
       - TZ=Etc/UTC
       # When 1, the web client auto-reconnects on network hiccups (default in entrypoint)
       - RECONNECT=1
     volumes:
-      # Persistent data (wallet, settings)
+      # Persistent data
       - wasabi-webtop-data:/config
     restart: unless-stopped
+    shm_size: 1gb
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 6
       start_period: 20s
-
-    # Optional: enable GPU acceleration
-    # Requires NVIDIA Container Toolkit on the host
-    # This works with Docker Compose v2+ (translates to device requests)
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
-    # For VA-API/DRI (Intel/AMD) you may also map the DRI device:
-    # devices:
-    #   - /dev/dri:/dev/dri
 
 volumes:
   wasabi-webtop-data:

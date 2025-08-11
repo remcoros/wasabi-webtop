@@ -179,6 +179,7 @@ RUN \
 
 # ports and volumes
 EXPOSE 3000
+EXPOSE 3001
 VOLUME /config
 
 ENTRYPOINT ["/usr/local/bin/docker_entrypoint.sh"]
