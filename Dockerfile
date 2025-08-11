@@ -38,9 +38,9 @@ FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm-876361b9-ls121 AS buil
 # these are specified in Makefile
 ARG ARCH
 ARG PLATFORM
-ARG WASABI_VERSION
-ARG WASABI_VERSION_TAG
-ARG WASABI_PGP_SIG
+ARG WASABI_VERSION=2.6.0
+ARG WASABI_VERSION_TAG=2.6.0
+ARG WASABI_PGP_SIG=856348328949861E
 
 RUN \
   echo "**** install packages ****" && \
