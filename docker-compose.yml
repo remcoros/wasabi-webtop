@@ -1,16 +1,13 @@
 services:
   wasabi-webtop:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: remcoros/wasabi-webtop:latest
+    image: ghcr.io/remcoros/wasabi-webtop:latest
     container_name: wasabi-webtop
     ports:
       - "3000:3000"
       - "3001:3001"
     environment:
       # CHANGE THIS USERNAME/PASSWORD!!
-      - CUSTOMER_USER=webtop
+      - CUSTOM_USER=webtop
       - PASSWORD=password
       - PUID=1000
       - PGID=1000
@@ -23,7 +20,7 @@ services:
     restart: unless-stopped
     shm_size: 1gb
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/ || exit 1"]
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 3000 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 6
