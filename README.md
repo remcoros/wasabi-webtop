@@ -25,7 +25,7 @@ docker run -d \
     -v /opt/wasabi-webtop-data:/config \
     --shm-size="1gb" \
     --restart unless-stopped \
-    remcoros/wasabi-webtop \
+    ghcr.io/remcoros/wasabi-webtop \
 ```
 # Start9 / StartOS
 
