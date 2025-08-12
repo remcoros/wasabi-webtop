@@ -16,7 +16,7 @@ Example docker command:
 docker run -d \
     --name wasabi-webtop \
     # CHANGE THIS USERNAME/PASSWORD!!
-    -e CUSTOMER_USER=webtop \
+    -e CUSTOM_USER=webtop \
     -e PASSWORD=password \
     -p 3000:3000 \
     -p 3001:3001 \
