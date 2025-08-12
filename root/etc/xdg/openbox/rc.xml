@@ -753,6 +753,12 @@
     </menu>
 
     <applications>
+        <application name="wassabee"
+            class="Wasabi Wallet"
+            title="Wasabi Wallet"
+            type="normal">
+            <fullscreen>yes</fullscreen>
+        </application>
         <!--
   # this is an example with comments through out. use these to make your
   # own rules, but without the comments of course.
