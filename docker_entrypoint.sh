@@ -14,7 +14,7 @@ chown -R 1000:1000 /config/.config/openbox
 
 # set default TITLE if it's not defined
 if [ -z "$TITLE" ]; then
-  TITLE="Wasabi Wallet"
+  export TITLE="Wasabi Wallet"
 fi
 
 # set RECONNECT to 1 if it's not defined
