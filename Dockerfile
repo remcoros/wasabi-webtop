@@ -89,9 +89,11 @@ RUN \
     perl \
     locales-all \
     x11-apps && \
-  # remove left-over locales and generate default
-  rm -rf $(ls -d /usr/share/locale/* | grep -vw /usr/share/locale/en) && \
-  localedef -i en_US -f UTF-8 en_US.UTF-8 && \
+  # remove left-over locales and generate en_US.UTF-8 via locale-gen
+  rm -rf $(ls -d /usr/share/locale/* | grep -vw /usr/share/locale/en | grep -v locale.alias) && \
+  echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+  locale-gen && \
+  update-locale LANG=en_US.UTF-8 && \
   # upgrade remaining packages
   DEBIAN_FRONTEND=noninteractive \
   apt-get upgrade -y && \
