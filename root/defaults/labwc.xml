@@ -37,7 +37,7 @@
 
   <windowRules>
     <windowRule identifier="*" serverDecoration="yes" />
-    <windowRule identifier="wassabee" title="Wasabi Wallet" windowType="normal"><action name="Maximize" /></windowRule>
+    <windowRule identifier="wassabee" title="Wasabi Wallet" type="normal"><action name="Maximize" /></windowRule>
     <windowRule identifier="brave" serverDecoration="no" />
     <windowRule identifier="chrome" serverDecoration="no" />
     <windowRule identifier="chromium-browser" serverDecoration="no" />
