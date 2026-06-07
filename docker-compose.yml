@@ -6,17 +6,17 @@ services:
       - "3000:3000"
       - "3001:3001"
     environment:
-      # CHANGE THIS USERNAME/PASSWORD!!
       - CUSTOM_USER=webtop
-      - PASSWORD=password
+      - PASSWORD=change-this-password
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
-      # When 1, the web client auto-reconnects on network hiccups (default in entrypoint)
-      - RECONNECT=1
     volumes:
       # Persistent data
       - wasabi-webtop-data:/config
+    # Uncomment for Intel/AMD GPU rendering and hardware video encoding.
+    # devices:
+    #   - /dev/dri:/dev/dri
     restart: unless-stopped
     shm_size: 1gb
     healthcheck:

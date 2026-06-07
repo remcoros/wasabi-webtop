@@ -757,7 +757,8 @@
             class="Wasabi Wallet"
             title="Wasabi Wallet"
             type="normal">
-            <fullscreen>yes</fullscreen>
+            <!-- <fullscreen>yes</fullscreen> -->
+            <maximized>true</maximized>
         </application>
         <!--
   # this is an example with comments through out. use these to make your
