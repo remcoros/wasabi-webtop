@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-372bdadb-ls115 AS buildstage
+FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-dd7f03ff-ls116 AS buildstage
 
 # these are specified in Makefile
 ARG ARCH
@@ -106,24 +106,29 @@ COPY --from=buildstage / .
 
 # restore runtime metadata inherited from the Selkies base image
 ENV \
-  PATH="/lsiopy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
-  HOME=/config \
-  LANGUAGE=en_US.UTF-8 \
-  LANG=en_US.UTF-8 \
-  TERM=xterm \
-  S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
+  # from https://github.com/linuxserver/docker-baseimage-debian/blob/master/Dockerfile
+  HOME="/root" \
+  LANGUAGE="en_US.UTF-8" \
+  LANG="en_US.UTF-8" \
+  TERM="xterm" \
+  S6_CMD_WAIT_FOR_SERVICES_MAXTIME="0" \
   S6_VERBOSITY=1 \
   S6_STAGE2_HOOK=/docker-mods \
   VIRTUAL_ENV=/lsiopy \
+  PATH="/lsiopy/bin:$PATH" \
+  # from https://github.com/linuxserver/docker-baseimage-selkies/blob/master/Dockerfile
   DISPLAY=:1 \
   PERL5LIB=/usr/local/bin \
-  START_DOCKER=false \
+  HOME=/config \
+  START_DOCKER=true \
   PULSE_RUNTIME_PATH=/defaults \
   SELKIES_INTERPOSER=/usr/lib/selkies_joystick_interposer.so \
   NVIDIA_DRIVER_CAPABILITIES=all \
   DISABLE_ZINK=false \
   DISABLE_DRI3=false \
   SELKIES_ENCODER="x264enc,jpeg" \
+  # custom for our image
+  START_DOCKER=false \
   GTK_THEME=Adwaita:dark \
   GTK2_RC_FILES=/usr/share/themes/Adwaita-dark/gtk-2.0/gtkrc \
   SELKIES_H264_STREAMING_MODE=true \
