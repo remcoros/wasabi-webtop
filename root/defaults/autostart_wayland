@@ -1,0 +1,4 @@
+# Work around UI glitch in Wasabi by presetting the screen resolution
+wlr-randr --output WL-1 --custom-mode 1920x1080
+
+/usr/local/bin/wassabee

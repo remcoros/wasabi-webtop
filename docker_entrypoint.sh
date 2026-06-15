@@ -8,21 +8,17 @@ echo
 cp /defaults/.backupignore /config/.backupignore
 
 # always overwrite autostart in case we change it
-mkdir -p /config/.config/openbox
-cp /defaults/autostart /config/.config/openbox/autostart
-chown -R 1000:1000 /config/.config/openbox
-
-# set default TITLE if it's not defined
-if [ -z "$TITLE" ]; then
-  export TITLE="Wasabi Wallet"
+if [ "${PIXELFLUX_WAYLAND}" = "true" ]; then
+  mkdir -p /config/.config/labwc
+  # remove stale backup so the base re-creates it from our /defaults/menu_wayland.xml
+  rm -f /config/.config/labwc/menu.xml.bak
+  cp /defaults/autostart_wayland /config/.config/labwc/autostart
+  cp /defaults/menu_wayland.xml /config/.config/labwc/menu.xml
+  chown -R 1000:1000 /config/.config/labwc
+else
+  mkdir -p /config/.config/openbox
+  cp /defaults/autostart /config/.config/openbox/autostart
+  chown -R 1000:1000 /config/.config/openbox
 fi
-
-# set RECONNECT to 1 if it's not defined
-if [ -z "$RECONNECT" ]; then
-  RECONNECT=1
-fi
-
-# add '&reconnect=' setting to kclient html
-sed -i "s/\(index\.html?autoconnect=1\)/&\&reconnect=$RECONNECT/" /kclient/public/index.html
 
 exec /init

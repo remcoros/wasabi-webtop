@@ -1,39 +1,4 @@
-# taken from https://github.com/linuxserver/docker-baseimage-kasmvnc/blob/debianbookworm/Dockerfile
-# modified to apply 'novnc.patch' (fixing a disconnect/reconnect issue)
-FROM node:12-buster AS wwwstage
-
-ARG KASMWEB_RELEASE="46412d23aff1f45dffa83fafb04a683282c8db58"
-
-RUN \
-  echo "**** build clientside ****" && \
-  mkdir /src && \
-  cd /src && \
-  wget https://github.com/kasmtech/noVNC/tarball/${KASMWEB_RELEASE} -O - \
-    | tar  --strip-components=1 -xz
-
-COPY ./patches/novnc.patch /src/
-RUN \
-  export QT_QPA_PLATFORM=offscreen && \
-  export QT_QPA_FONTDIR=/usr/share/fonts && \
-  echo "apply novnc.patch" && \
-  cd /src && \
-  patch -p1 -i novnc.patch && \
-  npm install && \
-  npm run-script build
-
-RUN \
-  echo "**** organize output ****" && \
-  mkdir /build-out && \
-  cd /src && \
-  rm -rf node_modules/ && \
-  cp -R ./* /build-out/ && \
-  cd /build-out && \
-  rm *.md && \
-  rm AUTHORS && \
-  cp index.html vnc.html && \
-  mkdir Downloads
-
-FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm-876361b9-ls121 AS buildstage
+FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-dd7f03ff-ls116 AS buildstage
 
 # these are specified in Makefile
 ARG ARCH
@@ -66,29 +31,30 @@ RUN \
     xfce4-notifyd \
     libnotify-bin \
     xclip \
-    # GPU support
-    xserver-xorg-video-all \
-    xserver-xorg-video-radeon \
-    va-driver-all \
     # other
-    policykit-1 \
+    polkitd \
+    pkexec \
     wget \
     gnupg && \
   # remove unused packages from base image
   DEBIAN_FRONTEND=noninteractive \
   apt-get remove --purge --autoremove -y \
+    cmake \
     containerd.io \
     docker-ce \
     docker-ce-cli \
     docker-buildx-plugin \
     docker-compose-plugin \
+    firmware-amd-graphics \
+    firmware-linux-nonfree \
+    firmware-misc-nonfree \
     fonts-noto-color-emoji \
     fonts-noto-core \
-    mesa-vulkan-drivers \
-    vulkan-tools \
-    perl \
+    fonts-noto-cjk \
+    g++ \
+    gcc \
     locales-all \
-    x11-apps && \
+    make && \
   # remove left-over locales and generate en_US.UTF-8 via locale-gen
   rm -rf $(ls -d /usr/share/locale/* | grep -vw /usr/share/locale/en | grep -v locale.alias) && \
   echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
@@ -99,11 +65,10 @@ RUN \
   apt-get upgrade -y && \
   echo "**** xfce tweaks ****" && \
   rm -f /etc/xdg/autostart/xscreensaver.desktop && \
-  # StartOS branding
-  echo "Starting Wasabi on Webtop..." > /etc/s6-overlay/s6-rc.d/init-adduser/branding; sed -i '/run_branding() {/,/}/d' /docker-mods && \
-  # cleanup and remove some unneeded large binaries
+  # branding
+  echo "Starting Wasabi on Webtop..." > /etc/s6-overlay/s6-rc.d/init-adduser/branding && \
+  # cleanup
   echo "**** cleanup ****" && \
-  rm /kasmbins/kasm_webcam_server && \
   apt-get autoclean && \
   rm -rf \
     /config/.cache \
@@ -128,17 +93,20 @@ RUN \
   DEBIAN_FRONTEND=noninteractive \
   apt-get install -y ./Wasabi-${WASABI_VERSION}.deb && \
   # cleanup
-  rm ./Wasabi* ./PGP.txt ./SHA256SUMS.asc
+  rm ./Wasabi* ./PGP.txt ./SHA256SUMS.asc && \
+  # hack to disable systemd-inhibit, which Wasabi uses for sleep/shutdown detection
+  # we don't need it, since we run in a container and don't use systemd or sleep the system.
+  # this gets rid of a lot of repeated warning logs
+  mv /usr/bin/systemd-inhibit /usr/bin/systemd-inhibit.disabled
 
 # start from scratch so we create smaller layers in the resulting image
 FROM scratch
 
 COPY --from=buildstage / .
-COPY --from=wwwstage /build-out /usr/local/share/kasmvnc/www
 
-# since we start from scratch, we need these env variables from the base images
+# restore runtime metadata inherited from the Selkies base image
 ENV \
-  # from ghcr.io/linuxserver/baseimage-debian:bookworm (https://github.com/linuxserver/docker-baseimage-debian/blob/master/Dockerfile)
+  # from https://github.com/linuxserver/docker-baseimage-debian/blob/master/Dockerfile
   HOME="/root" \
   LANGUAGE="en_US.UTF-8" \
   LANG="en_US.UTF-8" \
@@ -148,35 +116,35 @@ ENV \
   S6_STAGE2_HOOK=/docker-mods \
   VIRTUAL_ENV=/lsiopy \
   PATH="/lsiopy/bin:$PATH" \
-  # from ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm (https://github.com/linuxserver/docker-baseimage-kasmvnc/blob/debianbookworm/Dockerfile)
+  # from https://github.com/linuxserver/docker-baseimage-selkies/blob/master/Dockerfile
   DISPLAY=:1 \
   PERL5LIB=/usr/local/bin \
-  OMP_WAIT_POLICY=PASSIVE \
-  GOMP_SPINCOUNT=0 \
   HOME=/config \
-  # base container starts docker by default, but we removed it, so set to false
-  START_DOCKER=false \
+  START_DOCKER=true \
   PULSE_RUNTIME_PATH=/defaults \
+  SELKIES_INTERPOSER=/usr/lib/selkies_joystick_interposer.so \
   NVIDIA_DRIVER_CAPABILITIES=all \
-  # set dark theme
+  DISABLE_ZINK=false \
+  DISABLE_DRI3=false \
+  SELKIES_ENCODER="x264enc,jpeg" \
+  # custom for our image
+  START_DOCKER=false \
   GTK_THEME=Adwaita:dark \
   GTK2_RC_FILES=/usr/share/themes/Adwaita-dark/gtk-2.0/gtkrc \
-  # prevent kasm from touching our rc.xml
-  NO_FULL=1
+  SELKIES_H264_STREAMING_MODE=true \
+  SELKIES_UI_SIDEBAR_SHOW_APPS=false \
+  SELKIES_UI_SIDEBAR_SHOW_GAMEPADS=false \
+  SELKIES_GAMEPAD_ENABLED=false \
+  NO_GAMEPAD=true \
+  PIXELFLUX_WAYLAND=true \
+  NO_FULL=1 \
+  AUTO_GPU=true \
+  TITLE="Wasabi Wallet"
 
 # add local files
 COPY /root /
 COPY --chmod=755 ./docker_entrypoint.sh /usr/local/bin/docker_entrypoint.sh
-COPY --chmod=664 icon.png /kclient/public/icon.png
-COPY --chmod=664 icon.png /kclient/public/favicon.ico
-
-RUN \
-  # remove reference to non-existing file, see: https://github.com/linuxserver/kclient/issues/8
-  sed -i '/<script src="public\/js\/pcm-player\.js"><\/script>/d' /kclient/public/index.html && \
-  # hack to disable systemd-inhibit, which Wasabi uses for sleep/shutdown detection
-  # we don't need it, since we run in a container and don't use systemd or sleep the system.
-  # this gets rid of a lot of repeated warning logs
-  mv /usr/bin/systemd-inhibit /usr/bin/systemd-inhibit.disabled
+COPY --chmod=664 icon.png /usr/share/selkies/www/icon.png
 
 # ports and volumes
 EXPOSE 3000
