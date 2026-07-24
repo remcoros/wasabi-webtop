@@ -1,9 +1,9 @@
-FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-dd7f03ff-ls116 AS buildstage
+FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-b35c830f-ls122 AS buildstage
 
 # these are specified in Makefile
 ARG ARCH
-ARG WASABI_VERSION=2.7.2
-ARG WASABI_VERSION_TAG=2.7.2
+ARG WASABI_VERSION=2.8.1
+ARG WASABI_VERSION_TAG=2.8.1
 ARG WASABI_PGP_SIG=856348328949861E
 
 RUN \
