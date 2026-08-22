@@ -49,9 +49,22 @@ For NVIDIA GPUs, install the NVIDIA Container Toolkit and add:
 --runtime nvidia --gpus all
 ```
 
-Set `SELKIES_USE_CPU=true|locked` to force software video encoding. Turbo mode
-is enabled by default through `SELKIES_H264_STREAMING_MODE=true` and remains
-configurable in the Selkies sidebar.
+For the complete X11 software-rendering path, set:
+
+```shell
+-e PIXELFLUX_WAYLAND=false \
+-e AUTO_GPU=false \
+-e 'SELKIES_USE_CPU=true|locked' \
+-e DISABLE_DRI3=true \
+-e DISABLE_ZINK=true \
+-e LIBGL_ALWAYS_SOFTWARE=true
+```
+
+`LIBGL_ALWAYS_SOFTWARE=true` also disables the cosmetic X11 compositor, which
+otherwise spams harmless `BadDrawable` and `BadWindow` errors while rendering
+Wasabi's frequently changing windows. Turbo mode is enabled by default through
+`SELKIES_H264_STREAMING_MODE=true` and remains configurable in the Selkies
+sidebar.
 
 ## StartOS
 

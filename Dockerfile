@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-b35c830f-ls122 AS buildstage
+FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-47b9bee2-ls131 AS buildstage
 
 # these are specified in Makefile
 ARG ARCH
