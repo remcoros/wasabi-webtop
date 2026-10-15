@@ -1,9 +1,8 @@
-FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-dc0f730c-ls132 AS buildstage
+# Stable Debian Trixie image with Selkies 2.0.0 and the upstream webcam restart fix.
+FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-3900c0f0-ls140@sha256:c3f25149cf58957fcc4259904b02cf88b1e51fc8df2f9946bc64650701e527e7 AS buildstage
 
-# these are specified in Makefile
-ARG ARCH
-ARG WASABI_VERSION=2.8.2
-ARG WASABI_VERSION_TAG=2.8.2
+ARG WASABI_VERSION=2.8.4
+ARG WASABI_VERSION_TAG=2.8.4
 ARG WASABI_PGP_SIG=856348328949861E
 
 RUN \
@@ -85,7 +84,7 @@ RUN \
   wget --quiet https://github.com/WalletWasabi/WalletWasabi/releases/download/v${WASABI_VERSION_TAG}/Wasabi-${WASABI_VERSION}.deb \
                https://github.com/WalletWasabi/WalletWasabi/releases/download/v${WASABI_VERSION_TAG}/Wasabi-${WASABI_VERSION}.deb.asc \
                https://github.com/WalletWasabi/WalletWasabi/releases/download/v${WASABI_VERSION_TAG}/SHA256SUMS.asc \
-               https://raw.githubusercontent.com/WalletWasabi/WalletWasabi/master/PGP.txt && \
+               https://raw.githubusercontent.com/WalletWasabi/WalletWasabi/v${WASABI_VERSION_TAG}/PGP.txt && \
   # verify pgp and sha signatures
   gpg --import PGP.txt && \
   gpg --status-fd 1 --verify Wasabi-${WASABI_VERSION}.deb.asc | grep -q "GOODSIG ${WASABI_PGP_SIG} zkSNACKs <zksnacks@gmail.com>" || exit 1 && \
@@ -98,6 +97,10 @@ RUN \
   # we don't need it, since we run in a container and don't use systemd or sleep the system.
   # this gets rid of a lot of repeated warning logs
   mv /usr/bin/systemd-inhibit /usr/bin/systemd-inhibit.disabled
+
+# Remove the gallery installer, its startup provisioning and its external catalogue.
+COPY strip-proot-apps.sh /tmp/strip-proot-apps.sh
+RUN sh /tmp/strip-proot-apps.sh && rm -f /tmp/strip-proot-apps.sh
 
 # start from scratch so we create smaller layers in the resulting image
 FROM scratch
@@ -122,16 +125,35 @@ ENV \
   HOME=/config \
   START_DOCKER=true \
   PULSE_RUNTIME_PATH=/defaults \
-  SELKIES_INTERPOSER=/usr/lib/selkies_joystick_interposer.so \
+  SHELL=/bin/bash \
+  __GL_SYNC_TO_VBLANK=0 \
+  SELKIES_INTERPOSER=/usr/lib/selkies_input_interposer.so \
+  SELKIES_WEBCAM_INTERPOSER=/usr/lib/selkies_v4l2_interposer.so \
   NVIDIA_DRIVER_CAPABILITIES=all \
   DISABLE_ZINK=false \
   DISABLE_DRI3=false \
-  SELKIES_ENCODER="x264enc,jpeg" \
+  SELKIES_ENCODER="h264enc,jpeg" \
+  # nginx handles CUSTOM_USER/PASSWORD authentication in front of Selkies.
+  SELKIES_ENABLE_BASIC_AUTH=false \
+  SELKIES_ALLOWED_ORIGINS="*" \
+  SELKIES_RATE_CONTROL_MODE="crf,cbr" \
   # custom for our image
   START_DOCKER=false \
   GTK_THEME=Adwaita:dark \
   GTK2_RC_FILES=/usr/share/themes/Adwaita-dark/gtk-2.0/gtkrc \
-  SELKIES_H264_STREAMING_MODE=true \
+  # Default to change-based encoding at 30 fps; keep both settings adjustable.
+  SELKIES_VIDEO_STREAMING_MODE=false \
+  SELKIES_FRAMERATE="30,8-120" \
+  # The previous WebSocket runtime always resized to the browser, despite its false setting default.
+  SELKIES_ENABLE_RESIZE=true \
+  SELKIES_ENABLE_RATE_CONTROL=false \
+  SELKIES_VIDEO_BITRATE="1000-100000" \
+  SELKIES_USE_BROWSER_CURSORS=false \
+  SELKIES_ENABLE_BINARY_CLIPBOARD=false \
+  SELKIES_AUDIO_ENABLED="false|locked" \
+  SELKIES_MICROPHONE_ENABLED="false|locked" \
+  # Request browser camera access only while the wallet opens its scanner.
+  SELKIES_WEBCAM_ON_START=demand \
   SELKIES_UI_SIDEBAR_SHOW_APPS=false \
   SELKIES_UI_SIDEBAR_SHOW_GAMEPADS=false \
   SELKIES_GAMEPAD_ENABLED=false \

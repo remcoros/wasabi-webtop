@@ -1,7 +1,7 @@
 # Wasabi Webtop
 
 Wasabi Webtop runs [Wasabi Wallet](https://wasabiwallet.io/) in a
-[Selkies powered](https://github.com/linuxserver/docker-baseimage-selkies/) Linux desktop that is accessible from a web browser.
+[Selkies 2 powered](https://github.com/linuxserver/docker-baseimage-selkies/) Linux desktop that is accessible from a web browser.
 
 Images are published for AMD64.
 
@@ -30,6 +30,20 @@ Open `https://localhost:3001` or `http://localhost:3000`.
 
 The included [`docker-compose.yml`](docker-compose.yml) provides the same
 baseline configuration.
+
+## Webcam and desktop capabilities
+
+Wasabi can request the browser camera when its QR scanner opens. Camera access
+requires browser permission and a secure origin: use trusted HTTPS, or localhost
+for local testing. A self-signed certificate must be trusted by the client.
+Tor Browser can display and control the desktop, but does not provide camera access.
+
+Desktop audio output and microphone forwarding are disabled and locked. The
+third-party proot application gallery and its installer are removed; the existing
+terminal, file manager, editor and sudo remain available. The desktop follows the
+browser size by default (`SELKIES_ENABLE_RESIZE=true`). Streaming defaults to
+30 fps with Turbo off; both remain adjustable in the Selkies sidebar. Wallet
+exit behavior retains its existing default.
 
 ## GPU Acceleration
 
@@ -62,9 +76,10 @@ For the complete X11 software-rendering path, set:
 
 `LIBGL_ALWAYS_SOFTWARE=true` also disables the cosmetic X11 compositor, which
 otherwise spams harmless `BadDrawable` and `BadWindow` errors while rendering
-Wasabi's frequently changing windows. Turbo mode is enabled by default through
-`SELKIES_H264_STREAMING_MODE=true` and remains configurable in the Selkies
-sidebar.
+Wasabi's frequently changing windows. Turbo mode is disabled by default through
+`SELKIES_VIDEO_STREAMING_MODE=false`, and `SELKIES_FRAMERATE="30,8-120"` sets
+the initial frame rate to 30 fps while retaining the 8–120 fps adjustment range.
+Both settings remain configurable in the Selkies sidebar.
 
 ## StartOS
 
