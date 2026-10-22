@@ -1,5 +1,5 @@
-# Stable Debian Trixie image with Selkies 2.0.0 and the upstream webcam restart fix.
-FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-3900c0f0-ls140@sha256:c3f25149cf58957fcc4259904b02cf88b1e51fc8df2f9946bc64650701e527e7 AS buildstage
+# Debian Trixie, Selkies 2.1.0 (debiantrixie-5b7527ee-ls143).
+FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-5b7527ee-ls143@sha256:fefbb88bff4cc8294ad42678b62f7c912da12e88dc4167101b161549fb4ad2d1 AS buildstage
 
 ARG WASABI_VERSION=2.8.4
 ARG WASABI_VERSION_TAG=2.8.4
