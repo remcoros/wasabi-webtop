@@ -1,8 +1,8 @@
-# Debian Trixie, Selkies 2.1.0 (debiantrixie-5b7527ee-ls143).
-FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-5b7527ee-ls143@sha256:fefbb88bff4cc8294ad42678b62f7c912da12e88dc4167101b161549fb4ad2d1 AS buildstage
+# Debian Trixie, Selkies 2.1.0 (debiantrixie-3b96e1dd-ls145).
+FROM ghcr.io/linuxserver/baseimage-selkies:debiantrixie-3b96e1dd-ls145@sha256:df4a9259e7535526005785202bd08b3b066250a64c65877802b2354fd6a975dd AS buildstage
 
-ARG WASABI_VERSION=2.8.4
-ARG WASABI_VERSION_TAG=2.8.4
+ARG WASABI_VERSION=2.8.5
+ARG WASABI_VERSION_TAG=2.8.5
 ARG WASABI_PGP_SIG=856348328949861E
 
 RUN \
